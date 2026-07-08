@@ -1,20 +1,23 @@
+const FIREBASE_CONFIG = {
+  apiKey: "ВАШ_API_KEY",
+  authDomain: "ВАШ_ПРОЕКТ.firebaseapp.com",
+  projectId: "ВАШ_PROJECT_ID",
+  storageBucket: "ВАШ_ПРОЕКТ.appspot.com",
+  messagingSenderId: "ВАШ_SENDER_ID",
+  appId: "ВАШ_APP_ID"
+};
+
 const APP_PASS = 'poker2024';
-const STORE = 'poker_data';
 const ADMIN_KEY = 'poker_admin';
 
-let data = loadData();
 let isAdmin = !!localStorage.getItem(ADMIN_KEY);
 
-function loadData(){
-  try{return JSON.parse(localStorage.getItem(STORE))||{players:[],games:[],rebuys:[]}}
-  catch(e){return{players:[],games:[],rebuys:[]}}
-}
-function saveData(){localStorage.setItem(STORE,JSON.stringify(data))}
+firebase.initializeApp(FIREBASE_CONFIG);
+const db = firebase.firestore();
 
 function q(s){return document.querySelector(s)}
 function qq(s){return document.querySelectorAll(s)}
 function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
-function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
 
 function toast(m,t){
   const e=document.getElementById('toast');
@@ -35,33 +38,31 @@ function fmtPhone(v){
 }
 
 document.addEventListener('DOMContentLoaded',()=>{
-  q('#phone').addEventListener('blur',function(){
-    this.value=fmtPhone(this.value);
-  });
-  q('#phone').addEventListener('input',function(){
-    this.value=this.value.replace(/[^0-9+()\-\s]/g,'');
-  });
+  if(isAdmin){q('#adminLogin').style.display='none';q('#adminPanel').style.display='block'}
 
-  q('#registerForm').addEventListener('submit',e=>{
+  q('#phone').addEventListener('blur',function(){this.value=fmtPhone(this.value)});
+  q('#phone').addEventListener('input',function(){this.value=this.value.replace(/[^0-9+()\-\s]/g,'')});
+
+  q('#registerForm').addEventListener('submit',async e=>{
     e.preventDefault();
     const n=q('#nickname').value.trim(),p=q('#phone').value.trim();
     if(!n)return toast('Введите ник','err');
     if(p.replace(/\D/g,'').length!==11)return toast('Некорректный номер','err');
-    if(data.players.find(x=>x.nickname.toLowerCase()===n.toLowerCase()))return toast('Такой ник уже есть','err');
-    if(data.players.find(x=>x.phone===p))return toast('Номер уже зарегистрирован','err');
-    data.players.push({
-      id:uid(),nickname:n,phone:p,
+    const snap=await db.collection('players').where('nickname','==',n).get();
+    if(!snap.empty)return toast('Такой ник уже есть','err');
+    const snap2=await db.collection('players').where('phone','==',p).get();
+    if(!snap2.empty)return toast('Номер уже зарегистрирован','err');
+    await db.collection('players').add({
+      nickname:n,phone:p,
       gamesPlayed:0,gamesWon:0,points:0,
       rebuys:0,rebuyTotal:0,
-      createdAt:new Date().toISOString()
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
     });
-    saveData();
     q('#registerForm').reset();
     toast('Игрок '+n+' записан!');
-    renderAll();
   });
 
-  q('#gameForm').addEventListener('submit',e=>{
+  q('#gameForm').addEventListener('submit',async e=>{
     e.preventDefault();
     const cbs=qq('#playersCheckboxes input:checked'),w=q('#winnerSelect').value;
     if(cbs.length<2)return toast('Минимум 2 игрока','err');
@@ -69,17 +70,21 @@ document.addEventListener('DOMContentLoaded',()=>{
     const ids=Array.from(cbs).map(c=>c.value);
     if(!ids.includes(w))return toast('Победитель среди участников','err');
     const pts=Math.max(1,Math.floor(100/ids.length));
-    data.players.forEach(p=>{
-      if(ids.includes(p.id)){
-        p.gamesPlayed++;
-        p.points+=pts;
-        if(p.id===w){p.gamesWon++;p.points+=20}
-      }
+    const batch=db.batch();
+    ids.forEach(id=>{
+      const ref=db.collection('players').doc(id);
+      batch.update(ref,{
+        gamesPlayed:firebase.firestore.FieldValue.increment(1),
+        points:firebase.firestore.FieldValue.increment(pts+(id===w?20:0)),
+        gamesWon:firebase.firestore.FieldValue.increment(id===w?1:0)
+      });
     });
-    data.games.push({id:uid(),date:new Date().toISOString(),players:ids,winner:w});
-    saveData();
+    await batch.commit();
+    await db.collection('games').add({
+      date:firebase.firestore.FieldValue.serverTimestamp(),
+      players:ids,winner:w
+    });
     toast('Игра записана!');
-    renderAll();
   });
 
   q('#adminForm').addEventListener('submit',e=>{
@@ -87,7 +92,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(q('#adminPass').value===APP_PASS){
       localStorage.setItem(ADMIN_KEY,'1');isAdmin=true;
       q('#adminLogin').style.display='none';q('#adminPanel').style.display='block';
-      toast('Добро пожаловать!');renderAll();
+      toast('Добро пожаловать!');
     }else toast('Неверный пароль','err');
   });
 
@@ -97,20 +102,21 @@ document.addEventListener('DOMContentLoaded',()=>{
     toast('Вы вышли');
   });
 
-  q('#rebuyForm').addEventListener('submit',e=>{
+  q('#rebuyForm').addEventListener('submit',async e=>{
     e.preventDefault();
     const pid=q('#rebuyPlayer').value,amt=parseInt(q('#rebuyAmount').value);
     if(!pid)return toast('Выберите игрока','err');
     if(!amt||amt<=0)return toast('Введите сумму','err');
-    const p=data.players.find(x=>x.id===pid);
-    if(!p)return toast('Игрок не найден','err');
-    p.rebuys=(p.rebuys||0)+1;
-    p.rebuyTotal=(p.rebuyTotal||0)+amt;
-    data.rebuys.push({id:uid(),date:new Date().toISOString(),playerId:pid,amount:amt});
-    saveData();
+    await db.collection('players').doc(pid).update({
+      rebuys:firebase.firestore.FieldValue.increment(1),
+      rebuyTotal:firebase.firestore.FieldValue.increment(amt)
+    });
+    await db.collection('rebuys').add({
+      date:firebase.firestore.FieldValue.serverTimestamp(),
+      playerId:pid,amount:amt
+    });
     q('#rebuyForm').reset();
-    toast('Ребай '+amt+' заисан!');
-    renderAll();
+    toast('Ребай '+amt+' записан!');
   });
 
   q('#exportBtn').addEventListener('click',()=>{
@@ -123,40 +129,52 @@ document.addEventListener('DOMContentLoaded',()=>{
     qq('.tab,.tab-content').forEach(e=>e.classList.remove('active'));
     b.classList.add('active');
     document.getElementById('tab-'+b.dataset.tab).classList.add('active');
-    if(b.dataset.tab==='admin'&&isAdmin)renderAdmin();
   }));
 
-  if(isAdmin){q('#adminLogin').style.display='none';q('#adminPanel').style.display='block'}
-  renderAll();
+  // Real-time listeners
+  db.collection('players').orderBy('createdAt','desc').onSnapshot(snap=>{
+    const list=[];
+    snap.forEach(d=>list.push({id:d.id,...d.data()}));
+    renderToday(list);
+    renderGameForm(list);
+    if(isAdmin)renderAdmin(list);
+  });
+
+  db.collection('players').onSnapshot(()=>{
+    renderLeaderboard();
+    renderGamesHistory();
+  });
+
+  db.collection('games').orderBy('date','desc').onSnapshot(()=>{
+    renderGamesHistory();
+  });
 });
 
-function renderAll(){
-  renderToday();
-  renderLeaderboard();
-  renderGameForm();
-  renderGamesHistory();
-  if(isAdmin)renderAdmin();
+async function getPlayers(){
+  const snap=await db.collection('players').get();
+  const list=[];
+  snap.forEach(d=>list.push({id:d.id,...d.data()}));
+  return list;
 }
 
-function renderToday(){
+async function renderToday(list){
   const c=q('#todayPlayers');
-  if(!data.players.length)return c.innerHTML='<div class="empty">Пока нет записей</div>';
-  const list=[...data.players].reverse().slice(0,20);
-  c.innerHTML=list.map((p,i)=>playerItem(p,i+1,false)).join('');
-  q('#totalCount').textContent='Всего: '+data.players.length+' игроков';
+  if(!list||!list.length)return c.innerHTML='<div class="empty">Пока нет записей</div>';
+  c.innerHTML=list.slice(0,20).map((p,i)=>playerItem(p,i+1,false)).join('');
+  q('#totalCount').textContent='Всего: '+list.length+' игроков';
 }
 
-function renderLeaderboard(){
+async function renderLeaderboard(){
+  const list=await getPlayers();
   const sort=q('#sortBy').value;
-  const list=[...data.players];
   list.sort((a,b)=>{
-    if(sort==='gamesPlayed')return b.gamesPlayed-a.gamesPlayed||b.points-a.points;
+    if(sort==='gamesPlayed')return (b.gamesPlayed||0)-(a.gamesPlayed||0)||(b.points||0)-(a.points||0);
     if(sort==='winRate'){
       const ra=a.gamesPlayed?a.gamesWon/a.gamesPlayed:0;
       const rb=b.gamesPlayed?b.gamesWon/b.gamesPlayed:0;
-      return rb-ra||b.points-a.points;
+      return rb-ra||(b.points||0)-(a.points||0);
     }
-    return b.points-a.points||b.gamesPlayed-a.gamesPlayed;
+    return (b.points||0)-(a.points||0)||(b.gamesPlayed||0)-(a.gamesPlayed||0);
   });
   const c=q('#leaderboardList');
   if(!list.length)return c.innerHTML='<div class="empty">Нет данных</div>';
@@ -175,20 +193,20 @@ function playerItem(p,pos,showPhone,full){
     (p.gamesWon||0)+'поб'+(full?' · '+wr+'%':'')+'</div></div></div>';
 }
 
-function renderGameForm(){
+function renderGameForm(list){
   const c=q('#playersCheckboxes'),w=q('#winnerSelect');
-  if(!data.players.length){
+  if(!list||!list.length){
     c.innerHTML='<div class="empty" style="padding:12px 0">Сначала зарегистрируйте игроков</div>';
     w.innerHTML='<option value="">— нет игроков —</option>';
     return;
   }
-  c.innerHTML=data.players.map(p=>'<label class="cb-item"><input type="checkbox" value="'+
+  c.innerHTML=list.map(p=>'<label class="cb-item"><input type="checkbox" value="'+
     p.id+'">'+esc(p.nickname)+'</label>').join('');
   c.querySelectorAll('input').forEach(cb=>cb.addEventListener('change',function(){
     this.parentElement.classList.toggle('active',this.checked);
     updateWinner();
   }));
-  window._pl=data.players;
+  window._pl=list;
   updateWinner();
 }
 
@@ -202,27 +220,30 @@ function updateWinner(){
   });
 }
 
-function renderGamesHistory(){
+async function renderGamesHistory(){
   const c=q('#gamesHistory');
-  if(!data.games.length)return c.innerHTML='<div class="empty">Нет сыгранных игр</div>';
-  const list=[...data.games].reverse().slice(0,20);
-  c.innerHTML=list.map(g=>{
-    const names=g.players.map(id=>{
-      const p=data.players.find(x=>x.id===id);
+  const snap=await db.collection('games').orderBy('date','desc').limit(20).get();
+  if(snap.empty)return c.innerHTML='<div class="empty">Нет сыгранных игр</div>';
+  const games=[];
+  snap.forEach(d=>games.push({id:d.id,...d.data()}));
+  const players=await getPlayers();
+  c.innerHTML=games.map(g=>{
+    const names=(g.players||[]).map(id=>{
+      const p=players.find(x=>x.id===id);
       return p?p.nickname:'?';
     }).join(', ');
-    const w=data.players.find(x=>x.id===g.winner);
+    const w=players.find(x=>x.id===g.winner);
     const wn=w?w.nickname:'?';
-    const d=new Date(g.date).toLocaleDateString('ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+    const d=g.date?.toDate ? g.date.toDate().toLocaleDateString('ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
     return '<div class="game-item"><div class="game-left"><b>'+esc(wn)+'</b> выиграл · '+
       esc(names)+'</div><div class="game-right">'+d+'</div></div>';
   }).join('');
 }
 
-function renderAdmin(){
+function renderAdmin(list){
   const c=q('#adminPlayers');
-  if(!data.players.length)return c.innerHTML='<div class="empty">Нет игроков</div>';
-  c.innerHTML=data.players.map((p,i)=>{
+  if(!list||!list.length)return c.innerHTML='<div class="empty">Нет игроков</div>';
+  c.innerHTML=list.map(p=>{
     const av=(p.nickname||'?').charAt(0).toUpperCase();
     return '<div class="player"><div class="player-info"><div class="player-avatar">'+
       av+'</div><div><div class="player-name">'+esc(p.nickname)+
@@ -233,5 +254,5 @@ function renderAdmin(){
   }).join('');
   const s=q('#rebuyPlayer');
   s.innerHTML='<option value="">— выберите —</option>';
-  data.players.forEach(p=>s.innerHTML+='<option value="'+p.id+'">'+esc(p.nickname)+' ('+esc(p.phone)+')</option>');
+  list.forEach(p=>s.innerHTML+='<option value="'+p.id+'">'+esc(p.nickname)+' ('+esc(p.phone)+')</option>');
 }
