@@ -4,6 +4,7 @@ const GIT_PATH = 'data/db.json';
 const APP_PASS = 'poker2024';
 const ADMIN_KEY = 'poker_admin';
 
+const SYNC_URL = 'https://script.google.com/macros/s/ВАШ_СКРИПТ/exec';
 const GIT_TOKEN = 'ghp_' + 'lQcJqVSfk7kbpdDArjZxsNrIa2mrvA24IVFP';
 const API = 'https://api.github.com/repos/'+GIT_OWNER+'/'+GIT_REPO+'/contents/'+GIT_PATH;
 
@@ -114,6 +115,15 @@ document.addEventListener('DOMContentLoaded',async()=>{
     toast('Ребай '+amt+' записан!');renderAll();
   });
   q('#exportBtn').addEventListener('click',()=>window.open('https://docs.google.com/spreadsheets/d/1MJEIG7W1VRYfQvCAjzLUEcteKfft-OuPdeoKUKa3r1Y','_blank'));
+  q('#syncBtn').addEventListener('click',async()=>{
+    toast('Синхронизация...');
+    try{
+      await fetch(SYNC_URL,{mode:'no-cors'});
+      toast('Синхронизация запущена!');
+    }catch(e){
+      toast('Ошибка синхронизации','err');
+    }
+  });
   q('#sortBy').addEventListener('change',renderLeaderboard);
   qq('.tab').forEach(b=>b.addEventListener('click',()=>{qq('.tab,.tab-content').forEach(e=>e.classList.remove('active'));b.classList.add('active');document.getElementById('tab-'+b.dataset.tab).classList.add('active')}));
   renderAll();
