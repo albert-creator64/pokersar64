@@ -2,73 +2,123 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Скоро здесь будет сайт</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-            color: #fff;
-        }
-        .container {
-            text-align: center;
-            padding: 2rem;
-        }
-        h1 {
-            font-size: 4rem;
-            font-weight: 300;
-            margin-bottom: 1rem;
-            letter-spacing: 0.5rem;
-            text-transform: uppercase;
-        }
-        .subtitle {
-            font-size: 1.2rem;
-            opacity: 0.8;
-            margin-bottom: 2rem;
-        }
-        .emoji {
-            font-size: 5rem;
-            margin-bottom: 1rem;
-        }
-        .progress-bar {
-            width: 200px;
-            height: 4px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 2px;
-            margin: 2rem auto;
-            overflow: hidden;
-        }
-        .progress-fill {
-            width: 30%;
-            height: 100%;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            border-radius: 2px;
-            animation: loading 2s ease-in-out infinite;
-        }
-        @@keyframes loading {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(400%); }
-        }
-        .footer {
-            font-size: 0.9rem;
-            opacity: 0.5;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Poker Lounge</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <div class="emoji">🚧</div>
-        <h1>Coming Soon</h1>
-        <p class="subtitle">Мы работаем над чем-то интересным. Скоро здесь появится сайт!</p>
-        <div class="progress-bar">
-            <div class="progress-fill"></div>
-        </div>
-        <p class="footer">&copy; 2026</p>
+    <div class="app">
+        <header class="header">
+            <div class="header-bg"></div>
+            <div class="header-content">
+                <div class="logo">
+                    <span class="logo-suit">♠</span>
+                    <h1>Poker Lounge</h1>
+                    <span class="logo-suit">♥</span>
+                </div>
+                <p class="subtitle">Запись и рейтинг игроков</p>
+            </div>
+        </header>
+
+        <nav class="tabs">
+            <button class="tab active" data-tab="register">Регистрация</button>
+            <button class="tab" data-tab="leaderboard">Рейтинг</button>
+            <button class="tab" data-tab="profile">Профиль</button>
+        </nav>
+
+        <main class="content">
+            <section id="tab-register" class="tab-content active">
+                <div class="card">
+                    <h2>Новый игрок</h2>
+                    <form id="registerForm">
+                        <div class="field">
+                            <label for="nickname">Никнейм</label>
+                            <input type="text" id="nickname" placeholder="Введите ник" required maxlength="20">
+                        </div>
+                        <div class="field">
+                            <label for="phone">Номер телефона</label>
+                            <input type="tel" id="phone" placeholder="+7 (999) 999-99-99" required>
+                        </div>
+                        <button type="submit" class="btn">Записаться</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h2>Последние записи</h2>
+                    <div id="recentPlayers" class="players-list">
+                        <p class="empty-state">Пока нет игроков</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="tab-leaderboard" class="tab-content">
+                <div class="card">
+                    <div class="leaderboard-header">
+                        <h2>Рейтинг игроков</h2>
+                        <select id="sortBy" class="sort-select">
+                            <option value="points">По очкам</option>
+                            <option value="gamesPlayed">По играм</option>
+                            <option value="winRate">По % побед</option>
+                        </select>
+                    </div>
+                    <div id="leaderboardList" class="players-list">
+                        <p class="empty-state">Нет данных для рейтинга</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>Записать результат игры</h2>
+                    <form id="gameForm">
+                        <div class="field">
+                            <label>Выберите игроков (минимум 2)</label>
+                            <div id="playersCheckboxes" class="checkboxes"></div>
+                        </div>
+                        <div class="field">
+                            <label>Победитель</label>
+                            <select id="winnerSelect" class="sort-select">
+                                <option value="">-- выберите --</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-secondary">Записать игру</button>
+                    </form>
+                </div>
+            </section>
+
+            <section id="tab-profile" class="tab-content">
+                <div class="card">
+                    <div class="profile-header">
+                        <div class="avatar">👤</div>
+                        <div id="profileInfo">
+                            <p class="profile-empty">Выберите игрока из рейтинга</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card" id="profileStats" style="display:none">
+                    <h2>Статистика</h2>
+                    <div class="stats-grid">
+                        <div class="stat">
+                            <span class="stat-value" id="statGames">0</span>
+                            <span class="stat-label">Игр</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-value" id="statWins">0</span>
+                            <span class="stat-label">Побед</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-value" id="statWinRate">0%</span>
+                            <span class="stat-label">% побед</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-value" id="statPoints">0</span>
+                            <span class="stat-label">Очки</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <div class="toast" id="toast"></div>
     </div>
+    <script src="app.js"></script>
 </body>
 </html>
