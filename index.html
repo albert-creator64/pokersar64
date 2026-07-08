@@ -19,124 +19,56 @@
                 <p class="subtitle">Запись и рейтинг игроков</p>
             </div>
         </header>
-
         <nav class="tabs">
             <button class="tab active" data-tab="register">Регистрация</button>
             <button class="tab" data-tab="leaderboard">Рейтинг</button>
             <button class="tab" data-tab="games">Игры</button>
             <button class="tab" data-tab="admin">Админ</button>
         </nav>
-
         <main class="content">
-            <!-- РЕГИСТРАЦИЯ -->
             <section id="tab-register" class="tab-content active">
-                <div class="card">
-                    <div class="card-title"><span class="icon">✚</span> Новый игрок</div>
-                    <form id="registerForm">
-                        <div class="field">
-                            <label>Никнейм</label>
-                            <input type="text" id="nickname" placeholder="Например: AceKing" maxlength="20" autocomplete="off">
-                        </div>
-                        <div class="field">
-                            <label>Телефон</label>
-                            <input type="tel" id="phone" placeholder="+7 (999) 999-99-99" autocomplete="off">
-                        </div>
-                        <button type="submit" class="btn">Записаться на игру</button>
-                    </form>
-                </div>
-                <div class="card">
-                    <div class="card-title"><span class="icon">📋</span> Игроки на сегодня</div>
-                    <div id="todayPlayers"><div class="empty">Пока нет записей</div></div>
-                    <div class="total-count" id="totalCount"></div>
-                </div>
+                <div class="card"><div class="card-title"><span class="icon">✚</span> Новый игрок</div>
+                <form id="registerForm">
+                    <div class="field"><label>Никнейм</label><input type="text" id="nickname" placeholder="Например: AceKing" maxlength="20" autocomplete="off"></div>
+                    <div class="field"><label>Телефон</label><input type="tel" id="phone" placeholder="+7 (999) 999-99-99" autocomplete="off"></div>
+                    <button type="submit" class="btn">Записаться на игру</button>
+                </form></div>
+                <div class="card"><div class="card-title"><span class="icon">📋</span> Игроки на сегодня</div>
+                <div id="todayPlayers"><div class="empty">Загрузка...</div></div>
+                <div class="total-count" id="totalCount"></div></div>
             </section>
-
-            <!-- РЕЙТИНГ -->
             <section id="tab-leaderboard" class="tab-content">
-                <div class="card">
-                    <div class="card-flex">
-                        <div class="card-title">🏆 Рейтинг</div>
-                        <select id="sortBy" class="sel">
-                            <option value="points">По очкам</option>
-                            <option value="gamesPlayed">По играм</option>
-                            <option value="winRate">По % побед</option>
-                        </select>
-                    </div>
-                    <div id="leaderboardList"><div class="empty">Нет данных</div></div>
-                </div>
+                <div class="card"><div class="card-flex"><div class="card-title">🏆 Рейтинг</div>
+                <select id="sortBy" class="sel"><option value="points">По очкам</option><option value="gamesPlayed">По играм</option><option value="winRate">По % побед</option></select></div>
+                <div id="leaderboardList"><div class="empty">Загрузка...</div></div></div>
             </section>
-
-            <!-- ИГРЫ -->
             <section id="tab-games" class="tab-content">
-                <div class="card">
-                    <div class="card-title">🎮 Записать игру</div>
-                    <form id="gameForm">
-                        <div class="field">
-                            <label>Участники (минимум 2)</label>
-                            <div id="playersCheckboxes"></div>
-                        </div>
-                        <div class="field">
-                            <label>Победитель</label>
-                            <select id="winnerSelect" class="sel"><option value="">— выберите —</option></select>
-                        </div>
-                        <button type="submit" class="btn btn-sec">Записать результат</button>
-                    </form>
-                </div>
-                <div class="card">
-                    <div class="card-title">📜 История игр</div>
-                    <div id="gamesHistory"><div class="empty">Нет сыгранных игр</div></div>
-                </div>
+                <div class="card"><div class="card-title">🎮 Записать игру</div>
+                <form id="gameForm">
+                    <div class="field"><label>Участники (минимум 2)</label><div id="playersCheckboxes"></div></div>
+                    <div class="field"><label>Победитель</label><select id="winnerSelect" class="sel"><option value="">— выберите —</option></select></div>
+                    <button type="submit" class="btn btn-sec">Записать результат</button>
+                </form></div>
+                <div class="card"><div class="card-title">📜 История игр</div>
+                <div id="gamesHistory"><div class="empty">Загрузка...</div></div></div>
             </section>
-
-            <!-- АДМИНКА -->
             <section id="tab-admin" class="tab-content">
-                <div id="adminLogin">
-                    <div class="card">
-                        <div class="card-title">🔐 Администратор</div>
-                        <form id="adminForm">
-                            <div class="field">
-                                <label>Пароль</label>
-                                <input type="password" id="adminPass" placeholder="Введите пароль">
-                            </div>
-                            <button type="submit" class="btn">Войти</button>
-                        </form>
-                    </div>
-                </div>
+                <div id="adminLogin"><div class="card"><div class="card-title">🔐 Администратор</div>
+                <form id="adminForm"><div class="field"><label>Пароль</label><input type="password" id="adminPass" placeholder="Введите пароль"></div>
+                <button type="submit" class="btn">Войти</button></form></div></div>
                 <div id="adminPanel" style="display:none">
-                    <div class="card">
-                        <div class="card-flex">
-                            <div class="card-title">⚙️ Панель</div>
-                            <button id="adminLogout" class="btn-sm">Выйти</button>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-title">👥 Все игроки с телефонами</div>
-                        <div id="adminPlayers"></div>
-                    </div>
-                    <div class="card">
-                        <div class="card-title">➕ Ребай</div>
-                        <form id="rebuyForm">
-                            <div class="field">
-                                <label>Игрок</label>
-                                <select id="rebuyPlayer" class="sel"></select>
-                            </div>
-                            <div class="field">
-                                <label>Сумма (₽)</label>
-                                <input type="number" id="rebuyAmount" placeholder="500" min="0">
-                            </div>
-                            <button type="submit" class="btn btn-sec">Записать ребай</button>
-                        </form>
-                    </div>
-                    <div class="card">
-                        <div class="card-title">📊 Google Таблица</div>
-                        <button id="exportBtn" class="btn btn-sec">Открыть таблицу</button>
-                    </div>
-                </div>
+                <div class="card"><div class="card-flex"><div class="card-title">⚙️ Панель</div><button id="adminLogout" class="btn-sm">Выйти</button></div></div>
+                <div class="card"><div class="card-title">👥 Все игроки с телефонами</div><div id="adminPlayers"></div></div>
+                <div class="card"><div class="card-title">➕ Ребай</div>
+                <form id="rebuyForm"><div class="field"><label>Игрок</label><select id="rebuyPlayer" class="sel"></select></div>
+                <div class="field"><label>Сумма (₽)</label><input type="number" id="rebuyAmount" placeholder="500" min="0"></div>
+                <button type="submit" class="btn btn-sec">Записать ребай</button></form></div>
+                <div class="card"><div class="card-title">📊 Google Таблица</div>
+                <button id="exportBtn" class="btn btn-sec">Открыть таблицу</button></div></div>
             </section>
         </main>
         <div id="toast"></div>
     </div>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>`n    <script src="app.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
