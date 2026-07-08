@@ -1,11 +1,1 @@
-{
-    "rebuys":  [
-
-               ],
-    "games":  [
-
-              ],
-    "players":  [
-
-                ]
-}
+{"rebuys":[],"games":[],"players":[{"id":"mrc9j2644apt","nickname":"Антон","phone":"+7 (937) 229-97-98","gamesPlayed":0,"gamesWon":0,"points":0,"rebuys":0,"rebuyTotal":0,"createdAt":"2026-07-08T15:58:53.116Z"}]}
