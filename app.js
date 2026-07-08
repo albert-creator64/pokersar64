@@ -1,10 +1,10 @@
 const FIREBASE_CONFIG = {
-  apiKey: "ВАШ_API_KEY",
-  authDomain: "ВАШ_ПРОЕКТ.firebaseapp.com",
-  projectId: "ВАШ_PROJECT_ID",
-  storageBucket: "ВАШ_ПРОЕКТ.appspot.com",
-  messagingSenderId: "ВАШ_SENDER_ID",
-  appId: "ВАШ_APP_ID"
+  apiKey: "AIzaSyDtsW8-M4hRqdrn1tNu42Zn-r-TIWu74D0",
+  authDomain: "pokerlounge-a1f7d.firebaseapp.com",
+  projectId: "pokerlounge-a1f7d",
+  storageBucket: "pokerlounge-a1f7d.firebasestorage.app",
+  messagingSenderId: "386501027881",
+  appId: "1:386501027881:web:0a6743bc3b1e43f9fed438"
 };
 
 const APP_PASS = 'poker2024';
