@@ -1,5 +1,5 @@
 const GIT_OWNER = 'albert-creator64';
-const GIT_REPO = '-my-site';
+const GIT_REPO = 'pokersar64';
 const GIT_PATH = 'data/db.json';
 const APP_PASS = 'poker2024';
 const ADMIN_KEY = 'poker_admin';
