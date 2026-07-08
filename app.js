@@ -1,4 +1,4 @@
-const API_URL = 'https://script.google.com/macros/s/AKfycbxjSSEv6wh2dJpd7Ge8UxzNse9ehkULjlTg4BBBMmKoJZ4-qUxrxOB3fK42S2MfkLP6/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbxvMBDiUG7CjihMG03DCMS0MZuW_H-BSQUtsgD8eWprndLhZZykGo8xwyjtCAhdBZeqkw/exec';
 const ADMIN_TOKEN_KEY = 'poker_admin_token';
 
 let state = { players: [], isAdmin: false };
