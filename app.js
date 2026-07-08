@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
     e.preventDefault();
     const n=q('#nickname').value.trim(),p=q('#phone').value.trim();
     if(!n)return toast('Введите ник','err');
-    if(p.replace(/\D/g,'').length!==11)return toast('Некорректный номер','err');
+    var d=p.replace(/\D/g,'');if(d.length!==11||d.length>11)return toast('Номер должен быть 11 цифр','err');
     await loadDB();
     if(cache.players.find(x=>x.nickname.toLowerCase()===n.toLowerCase()))return toast('Такой ник уже есть','err');
     if(cache.players.find(x=>x.phone===p))return toast('Номер уже зарегистрирован','err');
