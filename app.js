@@ -34,13 +34,12 @@ function fmtPhone(v){
   return r;
 }
 
-// ---- INIT ----
 document.addEventListener('DOMContentLoaded',()=>{
-
-  q('#phone').addEventListener('input',function(){
-    const s=this.selectionStart,e=this.selectionEnd;
+  q('#phone').addEventListener('blur',function(){
     this.value=fmtPhone(this.value);
-    this.setSelectionRange(s,e);
+  });
+  q('#phone').addEventListener('input',function(){
+    this.value=this.value.replace(/[^0-9+()\-\s]/g,'');
   });
 
   q('#registerForm').addEventListener('submit',e=>{
@@ -110,7 +109,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     data.rebuys.push({id:uid(),date:new Date().toISOString(),playerId:pid,amount:amt});
     saveData();
     q('#rebuyForm').reset();
-    toast('Ребай '+amt+'₽ записан!');
+    toast('Ребай '+amt+' заисан!');
     renderAll();
   });
 
@@ -131,7 +130,6 @@ document.addEventListener('DOMContentLoaded',()=>{
   renderAll();
 });
 
-// ---- RENDER ----
 function renderAll(){
   renderToday();
   renderLeaderboard();
@@ -231,7 +229,7 @@ function renderAdmin(){
       '</div><div class="player-phone">'+esc(p.phone)+'</div></div></div>'+
       '<div class="player-right"><div class="player-pts">'+(p.points||0)+
       '</div><div class="player-info2">Ребаи: '+(p.rebuys||0)+' · '+
-      (p.rebuyTotal||0)+'₽</div></div></div>';
+      (p.rebuyTotal||0)+'</div></div></div>';
   }).join('');
   const s=q('#rebuyPlayer');
   s.innerHTML='<option value="">— выберите —</option>';
