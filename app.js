@@ -1,4 +1,4 @@
-const API_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbxjSSEv6wh2dJpd7Ge8UxzNse9ehkULjlTg4BBBMmKoJZ4-qUxrxOB3fK42S2MfkLP6/exec';
 const ADMIN_TOKEN_KEY = 'poker_admin_token';
 
 let state = { players: [], isAdmin: false };
@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('exportBtn').addEventListener('click', () => {
-        window.open('https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID', '_blank');
+        window.open('https://docs.google.com/spreadsheets/d/1MJEIG7W1VRYfQvCAjzLUEcteKfft-OuPdeoKUKa3r1Y', '_blank');
     });
 
     document.getElementById('sortBy').addEventListener('change', renderLeaderboard);
