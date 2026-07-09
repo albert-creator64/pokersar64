@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
     cache.players.push({
       id:uid(),nickname:n,phone:p,
       gamesPlayed:0,gamesWon:0,points:0,
-      knockouts:0,rebuys:0,rebuyTotal:0,
+      rebuys:0,rebuyTotal:0,
       createdAt:new Date().toISOString()
     });
     await saveDB();
@@ -105,23 +105,22 @@ document.addEventListener('DOMContentLoaded',async()=>{
     await loadDB();
     const pts=Math.max(1,Math.floor(100/ids.length));
     
-    // Collect knockouts
-    const knockouts=[];
-    qq('.ko-item').forEach(el=>{
-      const by=el.dataset.by;
-      const of=el.querySelector('.ko-target')?.value;
-      if(by&&of)knockouts.push({by,of});
+    const stacks={},gameRebuys={};
+    qq('.player-row').forEach(row=>{
+      const pid=row.dataset.pid;
+      if(ids.includes(pid)){
+        stacks[pid]=row.querySelector('.stack-btn.active')?.dataset.stack||'single';
+        gameRebuys[pid]=parseInt(row.querySelector('.rebuy-val').textContent)||0;
+      }
     });
-    
-    const koCount={};
-    knockouts.forEach(k=>{koCount[k.by]=(koCount[k.by]||0)+1});
     
     cache.players.forEach(p=>{
       if(ids.includes(p.id)){
         p.gamesPlayed=(p.gamesPlayed||0)+1;
-        p.points=(p.points||0)+pts+(p.id===w?20:0);
+        const mult=stacks[p.id]==='double'?1.5:1;
+        p.points=(p.points||0)+Math.round(pts*mult)+(p.id===w?20:0);
         if(p.id===w)p.gamesWon=(p.gamesWon||0)+1;
-        p.knockouts=(p.knockouts||0)+(koCount[p.id]||0);
+        p.rebuys=(p.rebuys||0)+(gameRebuys[p.id]||0);
       }
     });
     
@@ -129,11 +128,10 @@ document.addEventListener('DOMContentLoaded',async()=>{
       id:uid(),name,
       date:new Date().toISOString(),
       players:ids,winner:w,
-      knockouts
+      stacks,rebuys:gameRebuys
     });
     await saveDB();
     q('#gameForm').reset();
-    q('#knockoutSection').style.display='none';
     toast('Игра "'+name+'" записана!');
     renderAll();
   });
@@ -167,7 +165,6 @@ document.addEventListener('DOMContentLoaded',async()=>{
     toast('Ребай '+amt+' записан!');renderAll();
   });
   
-  q('#exportBtn').addEventListener('click',()=>window.open('https://docs.google.com/spreadsheets/d/1MJEIG7W1VRYfQvCAjzLUEcteKfft-OuPdeoKUKa3r1Y','_blank'));
   q('#sortBy').addEventListener('change',renderLeaderboard);
   
   qq('.tab').forEach(b=>b.addEventListener('click',()=>{
@@ -226,7 +223,6 @@ function renderLeaderboard(){
       const rb=b.gamesPlayed?b.gamesWon/b.gamesPlayed:0;
       return rb-ra||(b.points||0)-(a.points||0);
     }
-    if(sort==='knockouts')return(b.knockouts||0)-(a.knockouts||0)||(b.points||0)-(a.points||0);
     return(b.points||0)-(a.points||0)||(b.gamesPlayed||0)-(a.gamesPlayed||0);
   });
   
@@ -240,11 +236,10 @@ function playerItem(p,pos,showPhone,full){
   const av=(p.nickname||'?').charAt(0).toUpperCase();
   const ph=showPhone?'<div class="player-phone">'+esc(p.phone)+'</div>':'<div class="player-phone">&mdash;</div>';
   const wr=p.gamesPlayed?Math.round(p.gamesWon/p.gamesPlayed*100):0;
-  const rebStr=(p.rebuys||0)>0?'<span class="player-rebuys">💰 ребаи: '+(p.rebuys||0)+' · '+(p.rebuyTotal||0)+'</span>':'';
-  const koStr=(p.knockouts||0)>0?'<span class="player-rebuys">💀 нокауты: '+(p.knockouts||0)+'</span>':'';
+  const rebStr='<span class="player-rebuys">💰 ребаи: '+(p.rebuys||0)+' · '+(p.rebuyTotal||0)+'</span>';
   return '<div class="player '+cls+'"><div class="player-info"><span class="player-pos">'+
     pos+'</span><div class="player-avatar">'+av+'</div><div><div class="player-name">'+
-    esc(p.nickname)+'</div>'+ph+rebStr+koStr+'</div></div><div class="player-right"><div class="player-pts">'+
+    esc(p.nickname)+'</div>'+ph+rebStr+'</div></div><div class="player-right"><div class="player-pts">'+
     (p.points||0)+'</div><div class="player-info2">'+(p.gamesPlayed||0)+'игр '+
     (p.gamesWon||0)+'поб'+(full?' · '+wr+'%':'')+'</div></div></div>';
 }
@@ -256,14 +251,32 @@ function renderGameForm(){
     w.innerHTML='<option value="">— нет игроков —</option>';
     return;
   }
-  c.innerHTML=cache.players.map(p=>'<label class="cb-item"><input type="checkbox" value="'+
-    p.id+'">'+esc(p.nickname)+'</label>').join('');
-  c.querySelectorAll('input').forEach(cb=>cb.addEventListener('change',function(){
-    this.parentElement.classList.toggle('active',this.checked);
-    updateWinner();
-    updateKnockouts();
-  }));
+  c.innerHTML=cache.players.map(p=>'<div class="player-row" data-pid="'+p.id+'">'+
+    '<label class="cb-item"><input type="checkbox" value="'+p.id+'"></label>'+
+    '<span class="pname">'+esc(p.nickname)+'</span>'+
+    '<div class="stack-group"><button class="stack-btn active" data-stack="single">1x</button>'+
+    '<button class="stack-btn" data-stack="double">2x</button></div>'+
+    '<div class="rebuy-ctrl"><button class="rebuy-btn minus">−</button>'+
+    '<span class="rebuy-val">0</span>'+
+    '<button class="rebuy-btn plus">+</button></div></div>').join('');
   window._pl=cache.players;
+  c.querySelectorAll('input').forEach(cb=>cb.addEventListener('change',function(){
+    this.closest('.player-row').classList.toggle('active',this.checked);
+    updateWinner();
+  }));
+  c.querySelectorAll('.stack-btn').forEach(btn=>btn.addEventListener('click',function(){
+    this.parentElement.querySelectorAll('.stack-btn').forEach(b=>b.classList.remove('active'));
+    this.classList.add('active');
+  }));
+  c.querySelectorAll('.rebuy-btn.plus').forEach(btn=>btn.addEventListener('click',function(){
+    const v=this.parentElement.querySelector('.rebuy-val');
+    v.textContent=parseInt(v.textContent)+1;
+  }));
+  c.querySelectorAll('.rebuy-btn.minus').forEach(btn=>btn.addEventListener('click',function(){
+    const v=this.parentElement.querySelector('.rebuy-val');
+    const n=parseInt(v.textContent)-1;
+    v.textContent=n<0?0:n;
+  }));
   updateWinner();
 }
 
@@ -277,40 +290,6 @@ function updateWinner(){
   });
 }
 
-function updateKnockouts(){
-  const section=q('#knockoutSection');
-  const list=q('#knockoutList');
-  const ck=qq('#playersCheckboxes input:checked');
-  const ids=Array.from(ck).map(c=>c.value);
-  if(ids.length<2){section.style.display='none';return}
-  section.style.display='block';
-  list.innerHTML='';
-  const winner=q('#winnerSelect').value;
-  ids.forEach(id=>{
-    if(id===winner)return;
-    const p=window._pl.find(x=>x.id===id);
-    if(!p)return;
-    const div=document.createElement('div');
-    div.className='knockout-item';
-    div.dataset.by='';
-    div.innerHTML='<span>'+esc(p.nickname)+' выбит игроком:</span>'+
-      '<select class="sel ko-target" style="min-width:100px"><option value="">— не выбит —</option></select>'+
-      '<button class="btn-sm ko-rm" style="display:none">✕</button>';
-    const sel=div.querySelector('.ko-target');
-    const otherIds=ids.filter(x=>x!==id);
-    otherIds.forEach(oid=>{
-      const op=window._pl.find(x=>x.id===oid);
-      if(op)sel.innerHTML+='<option value="'+oid+'">'+esc(op.nickname)+'</option>';
-    });
-    sel.addEventListener('change',function(){
-      div.dataset.by=this.value;
-      div.querySelector('.ko-rm').style.display=this.value?'inline-block':'none';
-    });
-    div.querySelector('.ko-rm').addEventListener('click',()=>{sel.value='';div.dataset.by='';div.querySelector('.ko-rm').style.display='none'});
-    list.appendChild(div);
-  });
-}
-
 function renderGamesHistory(){
   const c=q('#gamesHistory');
   if(!cache.games.length)return c.innerHTML='<div class="empty">Нет сыгранных игр</div>';
@@ -318,16 +297,16 @@ function renderGamesHistory(){
   c.innerHTML=list.map(g=>{
     const names=(g.players||[]).map(id=>{
       const p=cache.players.find(x=>x.id===id);
-      return p?p.nickname:'?';
+      return p?p.nickname+(g.stacks&&g.stacks[id]==='double'?' 2x':''):'?';
     }).join(', ');
     const w=cache.players.find(x=>x.id===g.winner);
     const wn=w?w.nickname:'?';
-    const kotal=(g.knockouts||[]).length;
     const d=new Date(g.date).toLocaleDateString('ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
-    const koStr=kotal?'<span style="color:#e74c3c;font-size:11px">💀 '+kotal+' нокаутов</span>':'';
+    const totalReb=Object.values(g.rebuys||{}).reduce((a,b)=>a+b,0);
+    const rebStr=totalReb?'<span style="color:#d4a843;font-size:11px">💰 '+totalReb+' ребаев</span>':'';
     return '<div><div class="game-name">'+esc(g.name||'Без названия')+'</div>'+
       '<div class="game-item"><div class="game-left"><b>'+esc(wn)+'</b> выиграл · '+
-      esc(names)+'</div><div class="game-right">'+d+'<br>'+koStr+'</div></div></div>';
+      esc(names)+'</div><div class="game-right">'+d+'<br>'+rebStr+'</div></div></div>';
   }).join('');
 }
 
@@ -340,7 +319,7 @@ function renderAdmin(){
       av+'</div><div><div class="player-name">'+esc(p.nickname)+
       '</div><div class="player-phone">'+esc(p.phone)+'</div></div></div>'+
       '<div class="player-right"><div class="player-pts">'+(p.points||0)+
-      '</div><div class="player-info2">Нокауты: '+(p.knockouts||0)+' · Ребаи: '+
+      '</div><div class="player-info2">Ребаи: '+
       (p.rebuys||0)+' · '+(p.rebuyTotal||0)+'</div></div></div>';
   }).join('');
   const s=q('#rebuyPlayer');
