@@ -69,10 +69,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .filter-btn{padding:6px 14px;border:1px solid rgba(255,255,255,.08);border-radius:6px;background:transparent;color:#888;font-size:11px;cursor:pointer;transition:.2s;font-weight:600}
 .filter-btn.active{background:#e74c3c;color:#fff;border-color:#e74c3c}
 
-.knockout-item{display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(255,255,255,.02);border-radius:8px;margin-bottom:4px;font-size:12px}
-.knockout-item .sel{min-width:120px}
-.knockout-item .btn-sm{padding:4px 8px;font-size:10px;margin-left:auto}
-.knock-add{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:rgba(212,168,67,.15);color:#d4a843;border:none;font-size:16px;cursor:pointer;margin-top:4px}
-
 .game-name{font-size:13px;font-weight:600;color:#e74c3c;margin-bottom:4px}
 .player-rebuys{font-size:10px;color:#888;display:block;margin-top:2px}
+
+.player-row{display:flex;align-items:center;gap:6px;padding:8px 10px;background:rgba(255,255,255,.02);border-radius:10px;margin-bottom:4px;border:1px solid transparent;transition:.2s}
+.player-row.active{background:rgba(212,168,67,.08);border-color:rgba(212,168,67,.2)}
+.player-row .cb-item{border:none;background:none;padding:0;margin:0;flex-shrink:0}
+.player-row .cb-item input{display:inline-block;width:18px;height:18px;accent-color:#d4a843;margin:0}
+.player-row .pname{font-size:12px;font-weight:600;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stack-group{display:flex;gap:2px;flex-shrink:0}
+.stack-btn{padding:3px 8px;border:1px solid rgba(255,255,255,.1);border-radius:4px;background:transparent;color:#888;font-size:10px;font-weight:600;cursor:pointer;transition:.2s}
+.stack-btn.active{background:rgba(212,168,67,.2);color:#d4a843;border-color:#d4a843}
+.rebuy-ctrl{display:flex;align-items:center;gap:4px;flex-shrink:0}
+.rebuy-btn{width:26px;height:26px;border-radius:50%;border:1px solid rgba(255,255,255,.1);background:transparent;color:#888;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s}
+.rebuy-btn:active{background:rgba(212,168,67,.2);color:#d4a843}
+.rebuy-val{font-size:13px;font-weight:700;color:#d4a843;min-width:18px;text-align:center}
