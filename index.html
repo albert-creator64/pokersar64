@@ -39,14 +39,17 @@
             </section>
             <section id="tab-leaderboard" class="tab-content">
                 <div class="card"><div class="card-flex"><div class="card-title">🏆 Рейтинг</div>
-                <select id="sortBy" class="sel"><option value="points">По очкам</option><option value="gamesPlayed">По играм</option><option value="winRate">По % побед</option></select></div>
+                <select id="sortBy" class="sel"><option value="points">По очкам</option><option value="gamesPlayed">По играм</option><option value="winRate">По % побед</option><option value="knockouts">По нокаутам</option></select></div>
+                <div class="filter-row"><button class="filter-btn active" data-filter="all">Все</button><button class="filter-btn" data-filter="today">Сегодня</button><button class="filter-btn" data-filter="week">Неделя</button><button class="filter-btn" data-filter="month">Месяц</button></div>
                 <div id="leaderboardList"><div class="empty">Загрузка...</div></div></div>
             </section>
             <section id="tab-games" class="tab-content">
                 <div class="card"><div class="card-title">🎮 Записать игру</div>
                 <form id="gameForm">
+                    <div class="field"><label>Название игры</label><input type="text" id="gameName" placeholder="Например: Турнир #1" maxlength="50"></div>
                     <div class="field"><label>Участники (минимум 2)</label><div id="playersCheckboxes"></div></div>
                     <div class="field"><label>Победитель</label><select id="winnerSelect" class="sel"><option value="">— выберите —</option></select></div>
+                    <div class="field" id="knockoutSection" style="display:none"><label>Нокауты (кто кого выбил)</label><div id="knockoutList"></div></div>
                     <button type="submit" class="btn btn-sec">Записать результат</button>
                 </form></div>
                 <div class="card"><div class="card-title">📜 История игр</div>
