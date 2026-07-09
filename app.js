@@ -192,10 +192,13 @@ function renderAll(){renderToday();renderLeaderboard();renderGameForm();renderGa
 
 function renderToday(){
   const c=q('#todayPlayers');
-  if(!cache.players.length)return c.innerHTML='<div class="empty">Пока нет записей</div>';
-  const list=[...cache.players].reverse().slice(0,20);
-  c.innerHTML=list.map((p,i)=>playerItem(p,i+1)).join('');
-  q('#totalCount').textContent='Всего: '+cache.players.length+' игроков';
+  const today=new Date().toLocaleDateString('ru-RU',{day:'numeric',month:'numeric',year:'numeric'});
+  const todayStart=new Date();todayStart.setHours(0,0,0,0);
+  const todayList=cache.players.filter(p=>new Date(p.createdAt)>=todayStart).reverse();
+  q('#todayTitle').textContent=' Игроки на сегодня ('+today+')';
+  if(!todayList.length)return c.innerHTML='<div class="empty">Нет записей за сегодня</div>';
+  c.innerHTML=todayList.map((p,i)=>playerItem(p,i+1)).join('');
+  q('#totalCount').textContent='Сегодня: '+todayList.length+' игроков';
 }
 
 function renderLeaderboard(){
