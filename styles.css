@@ -7,13 +7,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .header-bg::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(212,168,67,.12) 0%,transparent 70%)}
 .header-content{position:relative;z-index:1}
 .logo{display:flex;align-items:center;justify-content:center;gap:8px}
-.logo h1{font-size:26px;font-weight:800;letter-spacing:4px;background:linear-gradient(135deg,#d4a843,#f0c850);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.logo h1{font-size:26px;font-weight:800;letter-spacing:4px;background:linear-gradient(135deg,#e74c3c,#c0392b);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .suit{font-size:20px;color:#d4a843;opacity:.4}
 .subtitle{font-size:12px;color:#555;margin-top:3px;letter-spacing:1px}
 
 .tabs{display:flex;gap:4px;margin:-14px 14px 0;background:#161616;border-radius:12px;padding:4px;position:relative;z-index:2}
 .tab{flex:1;padding:9px 6px;border:none;background:transparent;color:#666;font-size:12px;font-weight:600;cursor:pointer;border-radius:8px;transition:all .3s;text-align:center}
-.tab.active{background:#d4a843;color:#0a0a0a;box-shadow:0 2px 12px rgba(212,168,67,.25)}
+.tab.active{background:#e74c3c;color:#0a0a0a;box-shadow:0 2px 12px rgba(212,168,67,.25)}
 .tab-content{display:none;padding:14px;animation:fade .25s}
 .tab-content.active{display:block}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
